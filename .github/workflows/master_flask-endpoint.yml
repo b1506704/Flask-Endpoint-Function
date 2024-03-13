@@ -33,6 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+             pip install --upgrade openai
 
       # Optional: Add step to run tests here
 
