@@ -2,7 +2,6 @@ import os
 import azure.functions as func
 import logging
 import json
-from openai import OpenAI
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -24,8 +23,8 @@ def prompt_handler(req: func.HttpRequest) -> func.HttpResponse:
         prompt = req_body.get('prompt')
 
     if prompt:
-        # client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-        client = OpenAI(api_key='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')
+        from openai import OpenAI
+        client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])        
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             max_tokens=4096,
