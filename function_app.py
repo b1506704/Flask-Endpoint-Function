@@ -22,7 +22,7 @@ def prompt_handler(req: func.HttpRequest) -> func.HttpResponse:
         prompt = req_body.get('prompt')
 
         if prompt:
-            from openai import OpenAI
+            # from openai import OpenAI
             # client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])        
             # response = client.chat.completions.create(
             #     model="gpt-3.5-turbo",
