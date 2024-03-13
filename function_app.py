@@ -1,8 +1,9 @@
+import os
 import azure.functions as func
 import logging
 import json
 from openai import OpenAI
-client = OpenAI(api_key='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')
+client = OpenAI(api_key=os.getenv('API_KEY'))
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
