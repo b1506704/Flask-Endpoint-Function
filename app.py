@@ -1,7 +1,17 @@
 import os
-from flask import (Flask, jsonify, request)
+from flask import (Flask, jsonify, request, render_template, send_from_directory)
 
 app = Flask(__name__)
+
+@app.route('/')
+def index():
+   print('Request for index page received')
+   return render_template('index.html')
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/api/prompt_handler', methods=['POST'])
 def handle_prompt():
