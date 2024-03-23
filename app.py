@@ -1,7 +1,15 @@
 import os
 from flask import (Flask, jsonify, redirect, request, render_template, send_from_directory, url_for)
+import PyPDF2
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+
+ALLOWED_EXTENSIONS = {'txt', 'pdf'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -49,5 +57,54 @@ def handle_prompt():
         else:
             return jsonify({"error": "Invalid request body. Please provide a valid JSON object."}), 500
 
+@app.route('/api/upload-file', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'message': 'No file uploaded'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'message': 'No selected file'}), 400
+    
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        text_content = extract_text(file_path)
+
+        if (text_content):
+            from openai import OpenAI
+            client = OpenAI(api_key = os.environ["OPENAI_API_KEY"])
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                max_tokens=4096,
+                messages=[{"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": text_content}]
+            )
+
+            return jsonify({"suggestion": response.choices[0].message.content})
+        
+        return jsonify({'message': 'File uploaded successfully!', 'text_content': text_content}), 201
+    else:
+        return jsonify({'message': 'Please upload allowed file types: txt, pdf'}), 415
+
+def extract_text(file_path):
+    if os.path.splitext(file_path)[1].lower() == '.txt':
+        with open(file_path, 'r') as f:
+            return f.read()
+    elif os.path.splitext(file_path)[1].lower() == '.pdf':
+        with open(file_path, 'rb') as pdf_file:
+            pdf_reader = PyPDF2.PdfReader(pdf_file)
+            num_pages = pdf_reader.getNumPages()
+            text = ''
+            for page_num in range(num_pages):
+                page = pdf_reader.getPage(page_num)
+                text += page.extract_text()
+            return text
+    else:
+        return jsonify({'message': 'Unsupported file type'}), 415
+
 if __name__ == '__main__':
+   app.config['UPLOAD_FOLDER'] = 'uploads'
    app.run()
