@@ -13,6 +13,17 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# format the response
+def format_response(text):
+    
+    lines = []
+    for line in text.splitlines():
+
+        formatted_line = (line.strip()).replace("*", "").replace("#", "")
+        lines.append(formatted_line)
+
+    return lines
+# end format the response
 
 @app.route('/')
 def index():
@@ -59,7 +70,7 @@ def handle_prompt():
                           {"role": "user", "content": prompt}]
             )
 
-            return jsonify({"suggestion": response.choices[0].message.content})
+            return jsonify({"suggestion": format_response(response.choices[0].message.content)})
         else:
             return jsonify({"error": "Invalid request body. Please provide a valid JSON object."}), 500
 
@@ -91,7 +102,7 @@ def upload_file():
                           {"role": "user", "content": text_content}]
             )
 
-            return jsonify({"suggestion": response.choices[0].message.content})
+            return jsonify({"suggestion": format_response(response.choices[0].message.content)})
 
         return jsonify({'message': 'File uploaded successfully!', 'text_content': text_content}), 201
     else:
