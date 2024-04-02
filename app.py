@@ -99,7 +99,7 @@ def upload_file():
                 model="gpt-3.5-turbo",
                 max_tokens=4096,
                 messages=[{"role": "system", "content": "You are a helpful assistant."},
-                          {"role": "user", "content": text_content}]
+                          {"role": "user", "content": "Please generate a MVP plan for this requirement: " + text_content}]
             )
 
             return jsonify({"suggestion": format_response(response.choices[0].message.content)})
