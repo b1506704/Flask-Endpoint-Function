@@ -8,6 +8,7 @@ app = Flask(__name__)
 
 ALLOWED_EXTENSIONS = {'txt', 'pdf'}
 
+KEY = os.environ["OPENAI_API_KEY"].replace("Bearer ", "").replace("\n\n", "")
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -62,7 +63,7 @@ def handle_prompt():
 
         if prompt:
             import openai
-            openai.api_key = os.environ["OPENAI_API_KEY"]
+            openai.api_key = KEY
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 max_tokens=4096,
@@ -93,8 +94,8 @@ def upload_file():
         text_content = extract_text(file_path)
 
         if (text_content):
-            import openai
-            openai.api_key = os.environ["OPENAI_API_KEY"]
+            import openai            
+            openai.api_key = KEY
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 max_tokens=4096,
